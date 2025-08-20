@@ -22,6 +22,7 @@ fi
 TEST_MODEL=${1:-"models/Qwen3-8B"}
 TEST_DATASET=${2:-"dataset/dataset/sonnet.txt"}
 DATASET_NAME=${3:-"sonnet"}
+TENSOR_PARALLEL_SIZE=${4:-1}
 
 
 if [ ! -d $TEST_MODEL ]; then
@@ -33,4 +34,5 @@ vllm bench throughput \
 --model $TEST_MODEL \
 --dataset-path $TEST_DATASET \
 --dataset-name $DATASET_NAME \
+--tensor-parallel-size $TENSOR_PARALLEL_SIZE \
 --num-prompts 10
