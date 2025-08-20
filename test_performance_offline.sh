@@ -1,22 +1,36 @@
 #!/bin/bash
 
-# Test Dataset
-TEST_DATASET="dataset/ShareGPT_V3_unfiltered_cleaned_split.json"
-TEST_DATASET_URL="https://huggingface.co/datasets/anon8231489123/ShareGPT_Vicuna_unfiltered/resolve/main/ShareGPT_V3_unfiltered_cleaned_split.json"
-if [ ! -f $TEST_DATASET ]; then
-    wget $TEST_DATASET_URL -O "dataset/ShareGPT_V3_unfiltered_cleaned_split.json"
-fi
+################################################################################################
+# arg 1: a directory to model
+# arg 2: testdataset path, which is a json file
+# 
+# -------------------example---------------------
+# bash test_performance_offline.sh \
+# /mnt/public/model/huggingface/Qwen3-8B dataset/ShareGPT_V3_unfiltered_cleaned_split.json
+################################################################################################
 
-if [ ! -x vllm ]; then
+if [ ! -x "$(command -v vllm)" ]; then
     echo "No vllm, Please Install!"
+    exit 1
 fi
 
-TEST_MODEL="Qwen/Qwen3-8B"
+if [ ! -x "$(command -v modelscope)" ]; then
+    echo "No modelscope, Please Install!"
+    exit 1
+fi
+
+TEST_MODEL=${1:-"models/Qwen3-8B"}
+TEST_DATASET=${2:-"dataset/dataset/sonnet.txt"}
+DATASET_NAME=${3:-"sonnet"}
+
+
+if [ ! -d $TEST_MODEL ]; then
+    modelscope download --model 'Qwen/Qwen3-8b' --local_dir $TEST_MODEL
+fi
 
 vllm bench throughput \
-  --backend vllm \
-  --model $TEST_MODEL \
-  --dataset-path $TEST_DATASET \
-  --dataset-name sharegpt \
-  --num-prompts 10
-
+--backend vllm \
+--model $TEST_MODEL \
+--dataset-path $TEST_DATASET \
+--dataset-name $DATASET_NAME \
+--num-prompts 10
